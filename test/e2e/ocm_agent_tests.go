@@ -50,7 +50,6 @@ var _ = Describe("ocm-agent", Ordered, func() {
 		testNotificationName        = "LoggingVolumeFillingUp"
 		clusterVersionName          = "version"
 		infrastructureName          = "cluster"
-		shortSleepInterval          = 5 * time.Second // 5 seconds
 
 		// ConfigMap keys
 		clusterIDKey  = "clusterID"
@@ -377,7 +376,6 @@ var _ = Describe("ocm-agent", Ordered, func() {
 		By("Step 5: Posting single alert, service log count should increase by 1")
 		err = testconst.PostAlert(ctx, firingAlert, httpClient, ocmAgentURL)
 		Expect(err).Should(BeNil(), "failed to post firing alert")
-		time.Sleep(shortSleepInterval)
 		testconst.CheckServiceLogCount(ctx, externalClusterID, preServiceLogCount, 1, ocmConnection)
 
 		// TEST - Do not send Service Log again for the same firing alert
@@ -389,8 +387,6 @@ var _ = Describe("ocm-agent", Ordered, func() {
 		err = testconst.PostAlert(ctx, duplicateAlert, httpClient, ocmAgentURL)
 		Expect(err).Should(BeNil(), "failed to post duplicate firing alert")
 
-		// Wait for processing
-		time.Sleep(shortSleepInterval)
 		testconst.CheckServiceLogCount(ctx, externalClusterID, preServiceLogCount, 0, ocmConnection)
 
 		// TEST - Send Service Log for resolved alert
@@ -402,8 +398,6 @@ var _ = Describe("ocm-agent", Ordered, func() {
 		err = testconst.PostAlert(ctx, resolvedAlert, httpClient, ocmAgentURL)
 		Expect(err).Should(BeNil(), "failed to post resolved alert")
 
-		// Wait for processing
-		time.Sleep(shortSleepInterval)
 		testconst.CheckServiceLogCount(ctx, externalClusterID, preServiceLogCount, 1, ocmConnection)
 
 		// TEST - Firing 2 alerts, servicelog count should be increased by 2
@@ -415,8 +409,6 @@ var _ = Describe("ocm-agent", Ordered, func() {
 		err = testconst.PostAlert(ctx, biAlerts, httpClient, ocmAgentURL)
 		Expect(err).Should(BeNil(), "failed to post resolved alert")
 
-		// Wait for processing
-		time.Sleep(shortSleepInterval)
 		testconst.CheckServiceLogCount(ctx, externalClusterID, preServiceLogCount, 2, ocmConnection)
 
 		// TEST - Resolve 2 alerts, servicelog count should be increased by 2
@@ -428,8 +420,6 @@ var _ = Describe("ocm-agent", Ordered, func() {
 		err = testconst.PostAlert(ctx, resolvedBiAlerts, httpClient, ocmAgentURL)
 		Expect(err).Should(BeNil(), "failed to post resolved alert")
 
-		// Wait for processing
-		time.Sleep(shortSleepInterval)
 		testconst.CheckServiceLogCount(ctx, externalClusterID, preServiceLogCount, 2, ocmConnection)
 
 		By("Step 10: Verifying ocm-agent is still healthy after alert tests")
@@ -633,8 +623,6 @@ var _ = Describe("ocm-agent", Ordered, func() {
 		// send the alert payload for the audit-webhook-error-putting-minimized-cloudwatch-log to the fleet-mode ocm-agent
 		err = testconst.PostAlert(ctx, alertPayloadAuditWebhook, httpClient, ocmAgentFleetURL)
 		Expect(err).Should(BeNil(), "failed to post alert")
-		// wait for shortSleepInterval
-		time.Sleep(shortSleepInterval)
 		testconst.CheckServiceLogCount(ctx, externalClusterID, preSLCount, 1, ocmConnection)
 		testconst.CheckMfnriCount(ctx, mcClusterID1, 1, 0, k8sClient)
 	})

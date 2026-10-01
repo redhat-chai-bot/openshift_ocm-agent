@@ -486,12 +486,13 @@ func GetServiceLogCount(ctx context.Context, clusterUUID string, ocmConnection *
 }
 
 // CheckServiceLogCount verifies the service log count matches expectations
+// using Eventually polling to tolerate OCM API propagation delay.
 func CheckServiceLogCount(ctx context.Context, clusterUUID string, preCount, expectedNew int, ocmConnection *sdk.Connection) {
 	expectedTotal := preCount + expectedNew
-	actualCount, err := GetServiceLogCount(ctx, clusterUUID, ocmConnection)
-	Expect(err).Should(BeNil(), "failed to get service log count")
-	Expect(actualCount).Should(Equal(expectedTotal),
-		fmt.Sprintf("Expected SL count: %d, Got SL count: %d", expectedTotal, actualCount))
+	Eventually(func() (int, error) {
+		return GetServiceLogCount(ctx, clusterUUID, ocmConnection)
+	}, 30*time.Second, 2*time.Second).Should(Equal(expectedTotal),
+		fmt.Sprintf("Expected SL count: %d after polling", expectedTotal))
 }
 
 // CreateFleetAlert creates an alert payload for fleet mode
